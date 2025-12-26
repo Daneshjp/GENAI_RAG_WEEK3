@@ -1,2 +1,5 @@
-def retrieve_chunks(vectordb, query, k=3):
-    return vectordb.similarity_search(query, k=k)
+def retrieve_chunks(query, vectorstore, k=3):
+    """
+    vectorstore must be a Chroma object
+    """
+    return vectorstore.similarity_search(query, k=k)
