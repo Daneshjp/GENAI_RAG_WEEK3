@@ -1,164 +1,168 @@
-📘 GENAI_RAG_WEEK3
+📘 Retrieval-Augmented Question Answering on Class XII English Textbook
+Overview
 
-End-to-End Retrieval-Augmented Generation (RAG) Pipeline
+This project demonstrates a Retrieval-Augmented Generation (RAG) pipeline built on a Class XII English textbook (PDF). The goal was to answer questions strictly grounded in the provided documents, while preventing hallucinations and unsupported responses.
 
-This repository demonstrates a production-style Retrieval-Augmented Generation (RAG) pipeline built using LangChain, ChromaDB, and OpenAI LLMs.
-It showcases how unstructured documents can be ingested, embedded, retrieved semantically, and used to generate grounded LLM answers.
+The system was developed as part of a Gen-AI coursework assignment to understand:
 
-🚀 Project Overview
-
-The goal of this project is to build a clean, modular, and explainable RAG system, progressing step-by-step from document ingestion to final LLM answer generation.
-
-Key capabilities:
-
-Document ingestion (PDF / text)
-
-Text chunking & embeddings
-
-Vector database storage (Chroma)
+Vector databases
 
 Semantic retrieval
 
-LLM-grounded answer generation (no hallucination)
+Hallucination risks
 
-🧠 Architecture (High Level)
-Documents
-   ↓
-Ingestion
-   ↓
+Prompt engineering inside RAG
+
+Guardrails for factual accuracy
+
+Why Vanilla RAG Failed Initially
+
+A basic RAG pipeline retrieves semantically similar text and asks an LLM to generate an answer.
+However, this can still hallucinate when:
+
+Retrieved chunks are loosely related but not answer-supporting
+
+The LLM fills gaps using general world knowledge
+
+Questions are outside the document scope
+
+Example Failure
+
+When asked:
+
+“What are three ways to fine-tune a language model using this textbook?”
+
+The LLM generated a generic AI answer — even though the textbook contains no such information.
+
+How Hallucination Was Fixed
+
+Two guardrails were implemented:
+
+1️⃣ Strict RAG Prompt
+
+The LLM is explicitly instructed to:
+
+Use only retrieved context
+
+Return “I don’t know based on the provided documents” if unsupported
+
+2️⃣ Post-Generation Validation (Key Fix)
+
+A validation step checks whether the generated answer is actually supported by retrieved context.
+
+If not:
+
+I don't know based on the provided documents.
+
+
+This prevents:
+
+Out-of-scope answers
+
+Hallucinated explanations
+
+General AI knowledge leakage
+
+Multi-File Ingestion
+
+The ingestion pipeline supports multiple document formats:
+
+📄 PDF (textbook)
+
+📃 TXT
+
+📝 Markdown
+
+📘 DOCX
+
+All files placed in the /data folder are:
+
+Loaded
+
+Chunked
+
+Embedded
+
+Stored in a vector database (Chroma)
+
+This allows scalable document expansion without code changes.
+
+System Architecture
+PDF/Text Files
+      ↓
+Document Loader
+      ↓
 Text Chunking
-   ↓
+      ↓
 Embeddings
-   ↓
-Vector Store (ChromaDB)
-   ↓
-Retriever (Similarity Search)
-   ↓
-LLM (Context-aware Answer)
+      ↓
+Vector Store (Chroma)
+      ↓
+Retriever
+      ↓
+LLM + Guardrails
+      ↓
+Final Answer or "I don't know"
 
-📂 Repository Structure
-GENAI_RAG_WEEK3/
-│
-├── data/
-│   ├── sample.pdf
-│   └── sample.txt
-│
-├── ingestion.py        # Load documents
-├── splitter.py         # Chunk documents
-├── embeddings.py       # Generate embeddings
-├── vector_store.py     # Store embeddings in Chroma
-├── retriever.py        # Retrieve relevant chunks
-├── llm_answer.py       # Generate final LLM answer (RAG)
-├── main.py             # Orchestrates the full pipeline
-│
-├── requirements.txt
-└── README.md
+Example Questions Tested
+✅ Factual Question (Success)
 
-🔖 Version History
-✅ v1.0 — Core RAG Pipeline (Retrieval Ready)
+Who is the author of “An Astrologer’s Day” and when did he receive the Sahitya Akademi Award?
 
-Status: Stable
-Focus: Data → Embeddings → Retrieval
+✔ Correctly answered using document context
 
-Included:
+✅ Interpretive Question (Success)
 
-Document ingestion
+Why does the astrologer feel “a great load is gone” at the end?
 
-Chunking strategy
+✔ Answer grounded in the story’s text
 
-Embedding generation
+❌ Unsupported Question (Correctly Rejected)
 
-Chroma vector store
+How can this textbook be used to fine-tune an LLM for sentiment analysis?
 
-Semantic similarity retrieval
+✔ Response:
 
-At this stage, the system successfully retrieves relevant document chunks for a given query.
+I don't know based on the provided documents.
 
-✅ v1.1 — RAG + LLM Answer Generation (Current)
+Key Learning Outcomes
 
-Status: Stable end-to-end pipeline
-Focus: Retrieval + Grounded Answer Generation
+RAG reduces hallucination but does not eliminate it by default
 
-Enhancements:
+Prompt engineering alone is not sufficient
 
-Added llm_answer.py
+Post-generation validation is essential for safety
 
-Integrated OpenAI Chat model via LangChain
+Vector similarity ≠ factual correctness
 
-Prompt enforces context-only answering
+Guardrails make RAG production-ready
 
-Prevents hallucination if answer is not present in documents
+Future Improvements
 
-The pipeline now produces final human-readable answers grounded strictly in retrieved content.
+Confidence scoring (RAG vs KG)
 
-🧪 Example Execution
+Sentence-level citation checking
 
-Run the pipeline:
+Knowledge Graph visualisation
 
-python main.py
+Agent-based RAG (LangGraph)
 
+UI-based chatbot interface
 
-Sample query inside main.py:
+Tech Stack
 
-query = "Who was Rani Lakshmibai?"
-
-
-Output:
-
-Retrieved document chunks (debug view)
-
-Final RAG answer generated by LLM using retrieved context
-
-🧠 How Questions Are Handled (Important Concept)
-
-This project currently runs in single-shot mode:
-
-The query is defined in main.py
-
-The pipeline executes end-to-end
-
-One answer is generated
-
-Program exits
-
-➡️ No model is “trained” or kept alive
-
-This is intentional and mirrors real production RAG APIs.
-
-🔜 Next Logical Upgrade (Future)
-
-Interactive loop (while True)
-
-Chat memory
-
-API / UI interface (FastAPI / Streamlit)
-
-🛠 Tech Stack
-
-Python 3.11
+Python
 
 LangChain
 
-ChromaDB
+OpenAI GPT-3.5
 
-OpenAI (Chat models)
+Chroma Vector DB
 
-Vector embeddings
+PDF/Text loaders
 
-🎯 Why This Project Matters
-
-This repository demonstrates:
-
-Practical GenAI engineering (not just theory)
-
-Clean separation of RAG phases
-
-Debuggable, explainable AI workflows
-
-Portfolio-ready GenAI system design
-
-📌 Author
+Author
 
 JP
-Cloud | DevOps | GenAI | RAG Systems
-UK-based IT professional building real-world AI pipelines
+Gen-AI & Cloud Learning Assignment
+December 2025
