@@ -164,5 +164,5 @@ PDF/Text loaders
 Author
 
 JP
-Gen-AI & Cloud Learning Assignment
+Gen-AI - RAG chatbot - Assignment
 December 2025
